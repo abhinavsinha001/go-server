@@ -14,7 +14,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func metricsHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "qps %d!", counter.Rate())
+    fmt.Fprintf(w, "qps %d", counter.Rate())
 }
 
 func main() {
