@@ -13,12 +13,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
     counter.Incr(1)
 }
 
-func metricsQpsHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Qps %d!", counter.Rate())
+func metricsHandler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "qps %d!", counter.Rate())
 }
 
 func main() {
     http.HandleFunc("/application", handler)
-    http.HandleFunc("/metrics/qps", metricsQpsHandler)
+    http.HandleFunc("/metrics", metricsHandler)
     http.ListenAndServe(":8080", nil)
 }
