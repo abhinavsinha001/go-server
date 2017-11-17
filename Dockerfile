@@ -1,9 +1,7 @@
 FROM golang:latest 
 RUN mkdir /app 
-RUN mkdir -p /etc/custom-metrics 
 ADD . /app/ 
-ADD ./definition.json /etc/custom-metrics/
 WORKDIR /app 
-RUN go get github.com/paulbellamy/ratecounter
+RUN go get github.com/prometheus/client_golang/prometheus/promhttp github.com/prometheus/client_golang/prometheus
 RUN go build -o main . 
 CMD ["/app/main"]
