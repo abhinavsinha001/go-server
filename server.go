@@ -2,23 +2,38 @@ package main
 
 import (
     "fmt"
+    "flag"
+    "log"
     "net/http"
-    "github.com/paulbellamy/ratecounter"
-    "time"
+    "github.com/prometheus/client_golang/prometheus"
+    "github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-var counter = ratecounter.NewRateCounter(1 * time.Second)
+var addr = flag.String("listen-address", ":8080", "The address to listen on for HTTP requests.")
+var httpCounter = prometheus.NewCounter(prometheus.CounterOpts{
+        Name: "hits_total",
+        Help: "Number of http requests.",
+    })
+
 func handler(w http.ResponseWriter, r *http.Request) {
+   
     fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
-    counter.Incr(1)
+    httpCounter.Inc()
 }
 
-func metricsHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "# TYPE qps gauge\nqps %d\n", counter.Rate())
-}
 
-func main() {
-    http.HandleFunc("/application", handler)
-    http.HandleFunc("/metrics", metricsHandler)
-    http.ListenAndServe(":8080", nil)
+func main() {    
+    flag.Parse()
+    
+    err := prometheus.Register(httpCounter)
+    if err != nil {
+    fmt.Println("Push counter couldn't be registered AGAIN, no counting will happen:", err)
+        return
+    }
+
+    http.Handle("/metrics", promhttp.Handler())
+    http.HandleFunc("/", handler)
+    //log.Fatal(http.ListenAndServe(*addr, nil))
+
+    log.Fatal(http.ListenAndServe(*addr, nil))
 }
